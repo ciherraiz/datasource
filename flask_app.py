@@ -16,5 +16,4 @@ def get_dataset():
     if not os.path.isfile(csv_path):
         return f'ERROR: file {csv_file} was not found on the server'
     # Send the file back to the client
-    return(csv_path)
-    #return send_file(csv_path, as_attachment=True)
+    return send_file(csv_path, as_attachment=True)
