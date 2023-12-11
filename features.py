@@ -12,11 +12,12 @@ def get_symbol_features(data, s, start_date, end_date):
     df = df.rename(columns={'Close':s})
 
 
-    df[s + '_PC_O_pct'] = (data['Open'] - data['Close'].shift(1)) / data['Close'].shift(1) #Overnight percentage movement
+    df[s + '_C_O_pct'] = (data['Open'] - data['Close'].shift(1)) / data['Close'].shift(1) #Overnight percentage movement
     df[s + '_O_C_pct'] = (data['Close'] - data['Open']) / data['Open'] #Intraday percentage movement
     #df[s + '_PC_C_pct'] = (data['Close'] - data['Close'].shift(1)) / data['Close'].shift(1) #Close to Close percentage movement
-    df[s + '_PC_C_pct'] = data['Close'].pct_change() #Close to Close percentage movement
-    
+    df[s + '_C_C_pct'] = data['Close'].pct_change() #Close to Close percentage movement
+    # Previous Close  to Close percentaje
+    df[s + '_P_C_C_pct'] = df[s + '_C_C_pct'].shift()
     
     df[s + '_std'] = data['Close'].rolling(30).std(ddof=0)
     # Standard Deviation expected moves percentage
@@ -37,7 +38,7 @@ def get_symbol_features(data, s, start_date, end_date):
 
 
     # Consecutives positive returns
-    df['Bool'] = df[s + '_PC_C_pct'] > 0
+    df['Bool'] = df[s + '_C_C_pct'] > 0
     df[s + '_PC_C_UP_con'] = df['Bool'].groupby((~df['Bool']).cumsum()).cumsum()
 
     df['Bool'] = df[s + '_O_C_pct'] > 0
@@ -50,14 +51,14 @@ def get_symbol_features(data, s, start_date, end_date):
 
     # Labels
     
-    df[s + '_PC_C_lbl'] = (df[s + '_PC_C_pct'] > 0).astype(int)
+    df[s + '_C_C_lbl'] = (df[s + '_C_C_pct'] > 0).astype(int)
     df[s + '_O_C_lbl'] = (df[s + '_O_C_pct'] > 0).astype(int)
     
-    df[s + '_PC_C_1std_lbl'] = (df[s + '_PC_1std_pct'] < df[s + '_PC_C_pct']).astype(int)
-    df[s + '_PC_C_2std_lbl'] = (df[s + '_PC_2std_pct'] < df[s + '_PC_C_pct']).astype(int)
+    df[s + '_PC_C_1std_lbl'] = (df[s + '_PC_1std_pct'] < df[s + '_C_C_pct']).astype(int)
+    df[s + '_PC_C_2std_lbl'] = (df[s + '_PC_2std_pct'] < df[s + '_C_C_pct']).astype(int)
 
-    df[s + '_PC_C_1VEM_lbl'] = (df[s + '_PC_1VEM_pct'] < df[s + '_PC_C_pct']).astype(int)
-    df[s + '_PC_C_2VEM_lbl'] = (df[s + '_PC_2VEM_pct'] < df[s + '_PC_C_pct']).astype(int)
+    df[s + '_PC_C_1VEM_lbl'] = (df[s + '_PC_1VEM_pct'] < df[s + '_C_C_pct']).astype(int)
+    df[s + '_PC_C_2VEM_lbl'] = (df[s + '_PC_2VEM_pct'] < df[s + '_C_C_pct']).astype(int)
 
     df.drop(columns=['Bool'], inplace=True)
     df.dropna(inplace=True)
